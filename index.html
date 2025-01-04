@@ -13,6 +13,7 @@
         <div class="row mt-4">
             <!-- Form Input Barang -->
             <div class="col-md-4">
+                <h3>Form Barang</h3>
                 <form id="itemForm">
                     <div class="mb-3">
                         <label for="itemName" class="form-label">Nama Barang</label>
@@ -72,6 +73,14 @@
                     <p>Total Barang Terjual: <span id="totalItemsSold">0</span></p>
                     <p>Total Pendapatan: <span id="totalIncome">Rp 0</span></p>
                     <p>Kategori Terpopuler: <span id="mostPopularCategory">-</span></p>
+                </div>
+                <div class="mt-3">
+                    <label for="currencySelector" class="form-label">Pilih Mata Uang:</label>
+                    <select id="currencySelector" class="form-select">
+                        <option value="IDR" data-rate="1">IDR - Rupiah</option>
+                        <option value="USD" data-rate="0.00007">USD - Dollar</option>
+                        <option value="EUR" data-rate="0.00006">EUR - Euro</option>
+                    </select>
                 </div>
             </div>
         </div>
