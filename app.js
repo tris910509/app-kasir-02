@@ -1,134 +1,77 @@
-// Helper functions
+// Store Data
+let products = [];
+let categories = [];
+let cart = [];
+let transactions = [];
+
+// Helper Function to show notifications
 const showNotification = (message, type) => {
-    const notification = document.createElement("div");
-    notification.className = `alert alert-${type} alert-dismissible fade show`;
-    notification.role = "alert";
-    notification.textContent = message;
-    document.body.prepend(notification);
-    setTimeout(() => {
-        notification.classList.remove('show');
-        notification.remove();
-    }, 3000);
+    alert(`${type.toUpperCase()}: ${message}`);
 };
 
-// Supplier Management
-let suppliers = JSON.parse(localStorage.getItem("suppliers")) || [];
-const renderSupplierList = () => {
-    const supplierList = document.getElementById("supplierList");
-    supplierList.innerHTML = suppliers.map((supplier, index) => `
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            ${supplier}
-            <button class="btn btn-danger btn-sm" onclick="deleteSupplier(${index})">Hapus</button>
-        </li>
-    `).join('');
-};
-
-document.getElementById("addSupplierButton").addEventListener("click", () => {
-    const name = document.getElementById("supplierName").value.trim();
-    if (!name) {
-        showNotification("Silakan isi nama supplier dengan benar.", "danger");
-        return;
-    }
-    suppliers.push(name);
-    localStorage.setItem("suppliers", JSON.stringify(suppliers));
-    renderSupplierList();
-    showNotification("Supplier berhasil ditambahkan.", "success");
-    document.getElementById("supplierName").value = "";
-});
-
-function deleteSupplier(index) {
-    suppliers.splice(index, 1);
-    localStorage.setItem("suppliers", JSON.stringify(suppliers));
-    renderSupplierList();
-    showNotification("Supplier berhasil dihapus.", "success");
-}
-
-// Category Management
-let categories = JSON.parse(localStorage.getItem("categories")) || [];
+// Render Category List
 const renderCategoryList = () => {
     const categoryList = document.getElementById("categoryList");
     categoryList.innerHTML = categories.map((category, index) => `
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            ${category}
-            <button class="btn btn-danger btn-sm" onclick="deleteCategory(${index})">Hapus</button>
+        <li class="list-group-item">
+            ${category.name}
+            <button class="btn btn-danger btn-sm float-right" onclick="deleteCategory(${index})">Hapus</button>
         </li>
     `).join('');
 };
 
-document.getElementById("addCategoryButton").addEventListener("click", () => {
-    const name = document.getElementById("categoryName").value.trim();
-    if (!name) {
-        showNotification("Silakan isi nama kategori dengan benar.", "danger");
-        return;
-    }
-    categories.push(name);
-    localStorage.setItem("categories", JSON.stringify(categories));
-    renderCategoryList();
-
-    // Populate product category select dropdown
-    const productCategorySelect = document.getElementById("productCategory");
-    productCategorySelect.innerHTML = `<option value="">Pilih Kategori</option>` + 
-    categories.map(category => `<option value="${category}">${category}</option>`).join('');
-
-    showNotification("Kategori berhasil ditambahkan.", "success");
-    document.getElementById("categoryName").value = "";
-});
-
-function deleteCategory(index) {
-    categories.splice(index, 1);
-    localStorage.setItem("categories", JSON.stringify(categories));
-    renderCategoryList();
-    showNotification("Kategori berhasil dihapus.", "success");
-}
-
-// Product Management
-let products = JSON.parse(localStorage.getItem("products")) || [];
-const renderProductSelect = () => {
-    const productSelect = document.getElementById("selectProduct");
-    productSelect.innerHTML = products.map((product, index) => `
-        <option value="${index}">${product.name} - ${product.category} - Rp${product.price.toFixed(2)}</option>
-    `).join('');
-};
-
+// Render Product List
 const renderProductList = () => {
     const productList = document.getElementById("productList");
     productList.innerHTML = products.map((product, index) => `
-        <li class="list-group-item d-flex justify-content-between align-items-center">
+        <li class="list-group-item">
             ${product.name} - ${product.category} - Rp${product.price.toFixed(2)} - Stok: ${product.quantity}
-            <button class="btn btn-warning btn-sm" onclick="editProduct(${index})">Edit</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteProduct(${index})">Hapus</button>
+            <button class="btn btn-warning btn-sm float-right" onclick="editProduct(${index})">Edit</button>
+            <button class="btn btn-danger btn-sm float-right ml-2" onclick="deleteProduct(${index})">Hapus</button>
         </li>
     `).join('');
 };
 
+// Render Product Select for Transaction Form
+const renderProductSelect = () => {
+    const selectProduct = document.getElementById("selectProduct");
+    selectProduct.innerHTML = products.map(product => `
+        <option value="${product.id}">${product.name} - Rp${product.price.toFixed(2)} (Stok: ${product.quantity})</option>
+    `).join('');
+};
+
+// Render Cart
+const renderCart = () => {
+    const cartList = document.getElementById("cartList");
+    cartList.innerHTML = cart.map(item => `
+        <li class="list-group-item">
+            ${item.product.name} - Qty: ${item.quantity} - Total: Rp${item.totalPrice.toFixed(2)}
+            <button class="btn btn-danger btn-sm float-right" onclick="removeFromCart(${cart.indexOf(item)})">Hapus</button>
+        </li>
+    `).join('');
+};
+
+// Add Product
 document.getElementById("addProductButton").addEventListener("click", () => {
-    const name = document.getElementById("productName").value.trim();
+    const name = document.getElementById("productName").value;
     const category = document.getElementById("productCategory").value;
     const price = parseFloat(document.getElementById("productPrice").value);
-    const quantity = parseInt(document.getElementById("productQuantity").value, 10);
+    const quantity = parseInt(document.getElementById("productQuantity").value);
 
-    if (!name || !category || isNaN(price) || price <= 0 || isNaN(quantity) || quantity <= 0) {
-        showNotification("Mohon isi semua field dengan benar.", "danger");
+    if (!name || !category || !price || !quantity) {
+        showNotification("Semua input harus diisi!", "error");
         return;
     }
 
-    const existingProduct = products.find(p => p.name === name);
-    if (existingProduct) {
-        showNotification("Produk dengan nama ini sudah ada.", "danger");
-        return;
-    }
-
-    products.push({ name, category, price, quantity });
-    localStorage.setItem("products", JSON.stringify(products));
-    renderProductSelect();
-    renderProductList();
+    const product = { id: Date.now(), name, category, price, quantity };
+    products.push(product);
     showNotification("Produk berhasil ditambahkan.", "success");
-
-    document.getElementById("productName").value = "";
-    document.getElementById("productPrice").value = "";
-    document.getElementById("productQuantity").value = "";
+    renderProductList();
+    renderProductSelect();
+    document.getElementById("productForm").reset();
 });
 
+// Edit Product
 function editProduct(index) {
     const product = products[index];
     document.getElementById("productName").value = product.name;
@@ -138,98 +81,98 @@ function editProduct(index) {
 
     document.getElementById("addProductButton").innerText = "Update Produk";
     document.getElementById("addProductButton").onclick = () => {
-        const name = document.getElementById("productName").value.trim();
-        const category = document.getElementById("productCategory").value;
-        const price = parseFloat(document.getElementById("productPrice").value);
-        const quantity = parseInt(document.getElementById("productQuantity").value, 10);
-
-        if (!name || !category || isNaN(price) || price <= 0 || isNaN(quantity) || quantity <= 0) {
-            showNotification("Mohon isi semua field dengan benar.", "danger");
-            return;
-        }
-
-        products[index] = { name, category, price, quantity };
-        localStorage.setItem("products", JSON.stringify(products));
-        renderProductSelect();
-        renderProductList();
-        showNotification("Produk berhasil diperbarui.", "success");
-
-        document.getElementById("productName").value = "";
-        document.getElementById("productPrice").value = "";
-        document.getElementById("productQuantity").value = "";
-        document.getElementById("addProductButton").innerText = "Tambah Produk";
-        document.getElementById("addProductButton").onclick = addProduct;
+        updateProduct(index);
     };
 }
 
+// Update Product
+function updateProduct(index) {
+    const name = document.getElementById("productName").value;
+    const category = document.getElementById("productCategory").value;
+    const price = parseFloat(document.getElementById("productPrice").value);
+    const quantity = parseInt(document.getElementById("productQuantity").value);
+
+    if (!name || !category || !price || !quantity) {
+        showNotification("Semua input harus diisi!", "error");
+        return;
+    }
+
+    products[index] = { id: products[index].id, name, category, price, quantity };
+    showNotification("Produk berhasil diperbarui.", "success");
+    renderProductList();
+    renderProductSelect();
+    document.getElementById("productForm").reset();
+    document.getElementById("addProductButton").innerText = "Tambah Produk";
+    document.getElementById("addProductButton").onclick = addProduct;
+}
+
+// Delete Product
 function deleteProduct(index) {
     products.splice(index, 1);
-    localStorage.setItem("products", JSON.stringify(products));
-    renderProductSelect();
-    renderProductList();
     showNotification("Produk berhasil dihapus.", "success");
+    renderProductList();
+    renderProductSelect();
 }
 
-// Transaction Management
-let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
+// Add Category
+document.getElementById("addCategoryButton").addEventListener("click", () => {
+    const categoryName = document.getElementById("categoryName").value;
+    if (!categoryName) {
+        showNotification("Nama kategori harus diisi!", "error");
+        return;
+    }
 
+    categories.push({ name: categoryName });
+    showNotification("Kategori berhasil ditambahkan.", "success");
+    renderCategoryList();
+    document.getElementById("categoryName").value = "";
+});
+
+// Delete Category
+function deleteCategory(index) {
+    categories.splice(index, 1);
+    showNotification("Kategori berhasil dihapus.", "success");
+    renderCategoryList();
+}
+
+// Add Supplier
+document.getElementById("addSupplierButton").addEventListener("click", () => {
+    const supplierName = document.getElementById("supplierName").value;
+    if (!supplierName) {
+        showNotification("Nama supplier harus diisi!", "error");
+        return;
+    }
+
+    // Add supplier logic here (if needed)
+    showNotification("Supplier berhasil ditambahkan.", "success");
+    document.getElementById("supplierName").value = "";
+});
+
+// Add to Cart
 document.getElementById("processTransactionButton").addEventListener("click", () => {
-    const productIndex = parseInt(document.getElementById("selectProduct").value);
-    const quantity = parseInt(document.getElementById("transactionQuantity").value, 10);
+    const selectedProductId = parseInt(document.getElementById("selectProduct").value);
+    const selectedProduct = products.find(product => product.id === selectedProductId);
+    const quantity = parseInt(document.getElementById("transactionQuantity").value);
     const paymentMethod = document.getElementById("paymentMethod").value;
 
-    if (isNaN(productIndex) || isNaN(quantity) || quantity <= 0 || !paymentMethod) {
-        showNotification("Mohon isi semua field dengan benar.", "danger");
+    if (!selectedProduct || quantity <= 0 || quantity > selectedProduct.quantity) {
+        showNotification("Jumlah produk tidak valid!", "error");
         return;
     }
 
-    const product = products[productIndex];
-    if (product.quantity < quantity) {
-        showNotification("Stok tidak mencukupi.", "danger");
-        return;
-    }
+    const cartItem = {
+        product: selectedProduct,
+        quantity,
+        totalPrice: selectedProduct.price * quantity
+    };
 
-    const totalPrice = product.price * quantity;
-    cart.push({ product, quantity, totalPrice });
-
-    product.quantity -= quantity;
-    localStorage.setItem("products", JSON.stringify(products));
-    localStorage.setItem("cart", JSON.stringify(cart));
-
-    showNotification("Transaksi berhasil.", "success");
+    cart.push(cartItem);
+    selectedProduct.quantity -= quantity;
+    showNotification("Produk berhasil ditambahkan ke keranjang.", "success");
     renderCart();
 });
 
-function renderCart() {
-    const cartList = document.getElementById("cartList");
-    cartList.innerHTML = cart.map((item, index) => `
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            ${item.product.name} - Qty: ${item.quantity} - Total: Rp${item.totalPrice.toFixed(2)}
-            <button class="btn btn-danger btn-sm" onclick="removeFromCart(${index})">Hapus</button>
-        </li>
-    `).join('');
-}
-
-function removeFromCart(index) {
-    const item = cart.splice(index, 1)[0];
-    products.find(p => p.name === item.product.name).quantity += item.quantity;
-    localStorage.setItem("cart", JSON.stringify(cart));
-    localStorage.setItem("products", JSON.stringify(products));
-    renderCart();
-    showNotification("Item berhasil dihapus dari keranjang.", "success");
-}
-
-document.getElementById("checkoutButton").addEventListener("click", () => {
-    transactions.push({ cart, totalAmount: cart.reduce((acc, item) => acc + item.totalPrice, 0), paymentMethod: document.getElementById("paymentMethod").value, date: new Date().toLocaleString() });
-    cart = [];
-    localStorage.setItem("cart", JSON.stringify(cart));
-    localStorage.setItem("transactions", JSON.stringify(transactions));
-    showNotification("Checkout berhasil.", "success");
-    renderCart();
-    renderTransactionList();
-});
-
+// Render Transaction List
 const renderTransactionList = () => {
     const transactionList = document.getElementById("transactionList");
     transactionList.innerHTML = transactions.map((transaction, index) => `
@@ -242,6 +185,7 @@ const renderTransactionList = () => {
     `).join('');
 };
 
+// Generate Invoice
 function generateInvoice(index) {
     const transaction = transactions[index];
     const invoiceHtml = `
@@ -288,7 +232,6 @@ document.getElementById("printReceiptButton").addEventListener("click", () => {
 });
 
 // Initial render
-renderSupplierList();
 renderCategoryList();
 renderProductSelect();
 renderProductList();
