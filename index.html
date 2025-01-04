@@ -47,13 +47,6 @@
             <!-- Daftar Barang -->
             <div class="col-md-4">
                 <h3>Daftar Barang</h3>
-                <select id="filterCategory" class="form-select mb-3">
-                    <option value="" selected>Semua Kategori</option>
-                    <option value="Makanan">Makanan</option>
-                    <option value="Minuman">Minuman</option>
-                    <option value="Elektronik">Elektronik</option>
-                    <option value="Lainnya">Lainnya</option>
-                </select>
                 <input type="text" id="searchItem" class="form-control mb-3" placeholder="Cari barang...">
                 <ul id="itemList" class="list-group"></ul>
                 <h4 class="mt-4">Subtotal: <span id="subtotalCurrency">Rp</span> <span id="subtotalPrice">0</span></h4>
@@ -69,19 +62,16 @@
                 </div>
                 <button class="btn btn-secondary w-100 mt-2" id="exportPDF">Cetak PDF</button>
                 <button class="btn btn-info w-100 mt-2" id="printReceipt">Cetak Struk</button>
+                <button class="btn btn-warning w-100 mt-2" id="exportCSV">Ekspor CSV</button>
             </div>
 
-            <!-- Preview Struk -->
+            <!-- Statistik Penjualan -->
             <div class="col-md-4">
-                <h3>Preview Struk</h3>
-                <div id="receiptPreview" class="border p-3 rounded bg-light"></div>
-                <div class="mt-3">
-                    <label for="currencySelector" class="form-label">Pilih Mata Uang:</label>
-                    <select id="currencySelector" class="form-select">
-                        <option value="IDR" data-rate="1">IDR - Rupiah</option>
-                        <option value="USD" data-rate="0.00007">USD - Dollar</option>
-                        <option value="EUR" data-rate="0.00006">EUR - Euro</option>
-                    </select>
+                <h3>Statistik Penjualan</h3>
+                <div id="salesStatistics" class="border p-3 bg-light rounded">
+                    <p>Total Barang Terjual: <span id="totalItemsSold">0</span></p>
+                    <p>Total Pendapatan: <span id="totalIncome">Rp 0</span></p>
+                    <p>Kategori Terpopuler: <span id="mostPopularCategory">-</span></p>
                 </div>
             </div>
         </div>
