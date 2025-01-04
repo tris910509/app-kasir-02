@@ -75,31 +75,28 @@
                 <button type="button" id="processTransactionButton" class="btn btn-primary">Proses Transaksi</button>
             </form>
             <ul id="cartList" class="list-group mt-2"></ul>
-            <button id="checkoutButton" class="btn btn-success mt-2">Checkout</button>
         </div>
 
         <!-- Invoice & Reports -->
         <div class="mb-4">
-            <h3>Generate Invoice</h3>
-            <button id="generateInvoiceButton" class="btn btn-primary">Generate Invoice</button>
-            <div id="invoiceContainer" class="mt-2"></div>
-
-            <h3>Generate Reports</h3>
-            <select id="reportByCategory" class="form-control">
-                <option value="all">Semua Kategori</option>
-                <!-- Category options will be dynamically added here -->
-            </select>
-            <button id="generateReportButton" class="btn btn-primary mt-2">Generate Laporan</button>
+            <h3>Invoice & Reports</h3>
+            <div id="invoiceContainer"></div>
+            <button id="generateInvoiceButton" class="btn btn-primary mt-2">Generate Invoice</button>
+            <div class="form-group mt-2">
+                <select id="reportByCategory" class="form-control">
+                    <option value="all">Semua Kategori</option>
+                    <!-- Kategori akan diisi dinamis -->
+                </select>
+                <button id="generateReportButton" class="btn btn-primary mt-2">Generate Report</button>
+            </div>
         </div>
 
         <!-- Transaction List -->
         <div class="mb-4">
             <h3>Transaction List</h3>
             <ul id="transactionList" class="list-group mt-2"></ul>
+            <button id="printReceiptButton" class="btn btn-primary mt-2">Print Receipt</button>
         </div>
-
-        <!-- Print Receipt Button -->
-        <button id="printReceiptButton" class="btn btn-info">Cetak Struk</button>
     </div>
 
     <script src="app.js"></script>
