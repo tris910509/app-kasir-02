@@ -13,9 +13,9 @@ const showNotification = (message, type) => {
 const renderCategoryList = () => {
     const categoryList = document.getElementById("categoryList");
     categoryList.innerHTML = categories.map((category, index) => `
-        <li class="list-group-item">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
             ${category.name}
-            <button class="btn btn-danger btn-sm float-right" onclick="deleteCategory(${index})">Hapus</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteCategory(${index})">Hapus</button>
         </li>
     `).join('');
 };
@@ -24,10 +24,10 @@ const renderCategoryList = () => {
 const renderProductList = () => {
     const productList = document.getElementById("productList");
     productList.innerHTML = products.map((product, index) => `
-        <li class="list-group-item">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
             ${product.name} - ${product.category} - Rp${product.price.toFixed(2)} - Stok: ${product.quantity}
-            <button class="btn btn-warning btn-sm float-right" onclick="editProduct(${index})">Edit</button>
-            <button class="btn btn-danger btn-sm float-right ml-2" onclick="deleteProduct(${index})">Hapus</button>
+            <button class="btn btn-warning btn-sm" onclick="editProduct(${index})">Edit</button>
+            <button class="btn btn-danger btn-sm ml-2" onclick="deleteProduct(${index})">Hapus</button>
         </li>
     `).join('');
 };
@@ -44,9 +44,9 @@ const renderProductSelect = () => {
 const renderCart = () => {
     const cartList = document.getElementById("cartList");
     cartList.innerHTML = cart.map(item => `
-        <li class="list-group-item">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
             ${item.product.name} - Qty: ${item.quantity} - Total: Rp${item.totalPrice.toFixed(2)}
-            <button class="btn btn-danger btn-sm float-right" onclick="removeFromCart(${cart.indexOf(item)})">Hapus</button>
+            <button class="btn btn-danger btn-sm ml-2" onclick="removeFromCart(${cart.indexOf(item)})">Hapus</button>
         </li>
     `).join('');
 };
@@ -135,19 +135,6 @@ function deleteCategory(index) {
     renderCategoryList();
 }
 
-// Add Supplier
-document.getElementById("addSupplierButton").addEventListener("click", () => {
-    const supplierName = document.getElementById("supplierName").value;
-    if (!supplierName) {
-        showNotification("Nama supplier harus diisi!", "error");
-        return;
-    }
-
-    // Add supplier logic here (if needed)
-    showNotification("Supplier berhasil ditambahkan.", "success");
-    document.getElementById("supplierName").value = "";
-});
-
 // Add to Cart
 document.getElementById("processTransactionButton").addEventListener("click", () => {
     const selectedProductId = parseInt(document.getElementById("selectProduct").value);
@@ -176,7 +163,7 @@ document.getElementById("processTransactionButton").addEventListener("click", ()
 const renderTransactionList = () => {
     const transactionList = document.getElementById("transactionList");
     transactionList.innerHTML = transactions.map((transaction, index) => `
-        <li class="list-group-item">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
             <p><strong>Tanggal:</strong> ${transaction.date}</p>
             <p><strong>Total:</strong> Rp${transaction.totalAmount.toFixed(2)}</p>
             <p><strong>Metode Pembayaran:</strong> ${transaction.paymentMethod}</p>
