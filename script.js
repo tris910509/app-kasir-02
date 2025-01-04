@@ -142,3 +142,61 @@ document.getElementById("filterCategory").addEventListener("change", renderItems
 
 
 
+
+// Ekspor Data ke CSV
+const exportCSVButton = document.getElementById("exportCSV");
+exportCSVButton.addEventListener("click", () => {
+    if (items.length === 0) return alert("Tidak ada barang untuk diekspor!");
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Nama,Kategori,Harga,Diskon,Total Harga\n";
+    items.forEach(item => {
+        csvContent += `${item.name},${item.category},${item.totalPrice},${item.discount || 0},${item.totalPrice}\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "daftar_barang.csv");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+});
+
+// Statistik Penjualan
+const updateStatistics = () => {
+    const totalItemsSold = items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalIncome = items.reduce((sum, item) => sum + item.totalPrice, 0);
+    const categoryCounts = items.reduce((counts, item) => {
+        counts[item.category] = (counts[item.category] || 0) + item.quantity;
+        return counts;
+    }, {});
+
+    const mostPopularCategory = Object.entries(categoryCounts).reduce((a, b) => (b[1] > a[1] ? b : a), ["-", 0])[0];
+
+    document.getElementById("totalItemsSold").textContent = totalItemsSold;
+    document.getElementById("totalIncome").textContent = `${currencySymbol} ${totalIncome.toLocaleString()}`;
+    document.getElementById("mostPopularCategory").textContent = mostPopularCategory;
+};
+
+// Panggil Statistik di Akhir Proses
+const renderItems = () => {
+    // ... (Kode sebelumnya)
+    updateStatistics();
+};
+
+// Fitur Edit Barang
+const editItem = (index) => {
+    const item = items[index];
+    document.getElementById("itemName").value = item.name;
+    document.getElementById("itemCategory").value = item.category;
+    document.getElementById("itemPrice").value = item.price;
+    document.getElementById("itemQuantity").value = item.quantity;
+    document.getElementById("itemDiscount").value = item.discount;
+
+    items.splice(index, 1);
+    renderItems();
+};
+
+
+
