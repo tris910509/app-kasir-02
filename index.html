@@ -8,6 +8,26 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<label class="form-check-label" for="toggleDarkMode">Mode Gelap</label>
+<input type="checkbox" id="toggleDarkMode" class="form-check-input">
+
+    <form id="loginForm" class="d-flex flex-column align-items-start mb-3">
+    <div class="mb-2">
+        <label for="username">Username</label>
+        <input type="text" id="username" class="form-control" required>
+    </div>
+    <div class="mb-2">
+        <label for="password">Password</label>
+        <input type="password" id="password" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+</form>
+
+<p id="userInfo">Silakan login.</p>
+<button id="logoutButton" class="btn btn-secondary" style="display:none;">Logout</button>
+
+
+    
     <div class="container my-5">
         <h1 class="text-center">Aplikasi Kasir</h1>
         <div class="row mt-4">
@@ -84,6 +104,17 @@
                 </div>
             </div>
         </div>
+
+        <button id="backupData" class="btn btn-primary mt-2">Backup Data Transaksi</button>
+<button id="restoreData" class="btn btn-secondary mt-2">Restore Data Transaksi</button>
+
+
+<div class="mb-3">
+    <label for="transactionDate">Tanggal Transaksi</label>
+    <input type="text" id="transactionDate" class="form-control" readonly>
+</div>
+
+        
 
         <!-- Riwayat Transaksi -->
         <div class="mt-5">
