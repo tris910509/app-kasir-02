@@ -47,26 +47,42 @@
             <!-- Daftar Barang -->
             <div class="col-md-4">
                 <h3>Daftar Barang</h3>
+                <select id="filterCategory" class="form-select mb-3">
+                    <option value="" selected>Semua Kategori</option>
+                    <option value="Makanan">Makanan</option>
+                    <option value="Minuman">Minuman</option>
+                    <option value="Elektronik">Elektronik</option>
+                    <option value="Lainnya">Lainnya</option>
+                </select>
                 <input type="text" id="searchItem" class="form-control mb-3" placeholder="Cari barang...">
                 <ul id="itemList" class="list-group"></ul>
-                <h4 class="mt-4">Subtotal: Rp <span id="subtotalPrice">0</span></h4>
-                <h4>PPN (10%): Rp <span id="taxPrice">0</span></h4>
+                <h4 class="mt-4">Subtotal: <span id="subtotalCurrency">Rp</span> <span id="subtotalPrice">0</span></h4>
+                <h4>PPN (10%): <span id="taxCurrency">Rp</span> <span id="taxPrice">0</span></h4>
                 <div class="mb-3">
                     <label for="totalDiscount" class="form-label">Diskon Total (%)</label>
                     <input type="number" id="totalDiscount" class="form-control" placeholder="Masukkan diskon total (opsional)" min="0" max="100">
                 </div>
-                <h4>Total Akhir: Rp <span id="finalPrice">0</span></h4>
+                <h4>Total Akhir: <span id="finalCurrency">Rp</span> <span id="finalPrice">0</span></h4>
                 <div class="d-flex gap-2 mt-3">
                     <button class="btn btn-danger w-50" id="resetAll">Reset Semua</button>
                     <button class="btn btn-success w-50" id="saveTransaction">Simpan Transaksi</button>
                 </div>
                 <button class="btn btn-secondary w-100 mt-2" id="exportPDF">Cetak PDF</button>
+                <button class="btn btn-info w-100 mt-2" id="printReceipt">Cetak Struk</button>
             </div>
 
             <!-- Preview Struk -->
             <div class="col-md-4">
                 <h3>Preview Struk</h3>
                 <div id="receiptPreview" class="border p-3 rounded bg-light"></div>
+                <div class="mt-3">
+                    <label for="currencySelector" class="form-label">Pilih Mata Uang:</label>
+                    <select id="currencySelector" class="form-select">
+                        <option value="IDR" data-rate="1">IDR - Rupiah</option>
+                        <option value="USD" data-rate="0.00007">USD - Dollar</option>
+                        <option value="EUR" data-rate="0.00006">EUR - Euro</option>
+                    </select>
+                </div>
             </div>
         </div>
 
