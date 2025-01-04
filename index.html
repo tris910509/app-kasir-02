@@ -3,122 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Kasir</title>
+    <title>Kasir Aplikasi</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script src="app.js"></script>
 </head>
 <body>
 
-<div class="container mt-5">
-    <h2>Aplikasi Kasir</h2>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Kasir Aplikasi</a>
+    </nav>
 
-    <!-- Supplier Management -->
-    <div class="mb-4">
-        <h4>Manajemen Supplier</h4>
-        <form id="supplierForm">
-            <div class="form-group">
-                <label for="supplierName">Nama Supplier</label>
-                <input type="text" class="form-control" id="supplierName" placeholder="Nama Supplier">
-            </div>
-            <button type="button" class="btn btn-primary" id="addSupplierButton">Tambah Supplier</button>
-        </form>
-        <ul class="list-group mt-3" id="supplierList"></ul>
+    <div class="container mt-4">
+        <!-- Supplier Management -->
+        <div class="mb-4">
+            <h3>Supplier Management</h3>
+            <input type="text" id="supplierName" class="form-control" placeholder="Nama Supplier">
+            <button id="addSupplierButton" class="btn btn-primary mt-2">Tambah Supplier</button>
+            <ul id="supplierList" class="list-group mt-2"></ul>
+        </div>
+
+        <!-- Category Management -->
+        <div class="mb-4">
+            <h3>Category Management</h3>
+            <input type="text" id="categoryName" class="form-control" placeholder="Nama Kategori">
+            <button id="addCategoryButton" class="btn btn-primary mt-2">Tambah Kategori</button>
+            <ul id="categoryList" class="list-group mt-2"></ul>
+        </div>
+
+        <!-- Product Management -->
+        <div class="mb-4">
+            <h3>Product Management</h3>
+            <form id="productForm">
+                <div class="form-group">
+                    <input type="text" id="productName" class="form-control" placeholder="Nama Produk">
+                </div>
+                <div class="form-group">
+                    <select id="productCategory" class="form-control">
+                        <option value="">Pilih Kategori</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="productPrice" class="form-control" placeholder="Harga Produk">
+                </div>
+                <div class="form-group">
+                    <input type="number" id="productQuantity" class="form-control" placeholder="Stok Produk">
+                </div>
+                <button type="button" id="addProductButton" class="btn btn-primary">Tambah Produk</button>
+            </form>
+            <ul id="productList" class="list-group mt-2"></ul>
+        </div>
+
+        <!-- Transaction Management -->
+        <div class="mb-4">
+            <h3>Transaction Management</h3>
+            <form id="transactionForm">
+                <div class="form-group">
+                    <select id="selectProduct" class="form-control">
+                        <option value="">Pilih Produk</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="transactionQuantity" class="form-control" placeholder="Jumlah">
+                </div>
+                <div class="form-group">
+                    <select id="paymentMethod" class="form-control">
+                        <option value="cash">Cash</option>
+                        <option value="transfer">Transfer</option>
+                        <option value="ewallet">E-Wallet</option>
+                    </select>
+                </div>
+                <button type="button" id="processTransactionButton" class="btn btn-primary">Proses Transaksi</button>
+            </form>
+            <ul id="cartList" class="list-group mt-2"></ul>
+            <button id="checkoutButton" class="btn btn-success mt-2">Checkout</button>
+        </div>
+
+        <!-- Invoice & Reports -->
+        <div class="mb-4">
+            <h3>Generate Invoice</h3>
+            <button id="generateInvoiceButton" class="btn btn-primary">Generate Invoice</button>
+            <div id="invoiceContainer" class="mt-2"></div>
+
+            <h3>Generate Reports</h3>
+            <select id="reportByCategory" class="form-control">
+                <option value="all">Semua Kategori</option>
+                <!-- Category options will be dynamically added here -->
+            </select>
+            <button id="generateReportButton" class="btn btn-primary mt-2">Generate Laporan</button>
+        </div>
+
+        <!-- Transaction List -->
+        <div class="mb-4">
+            <h3>Transaction List</h3>
+            <ul id="transactionList" class="list-group mt-2"></ul>
+        </div>
+
+        <!-- Print Receipt Button -->
+        <button id="printReceiptButton" class="btn btn-info">Cetak Struk</button>
     </div>
 
-    <!-- Category Management -->
-    <div class="mb-4">
-        <h4>Manajemen Kategori</h4>
-        <form id="categoryForm">
-            <div class="form-group">
-                <label for="categoryName">Nama Kategori</label>
-                <input type="text" class="form-control" id="categoryName" placeholder="Nama Kategori">
-            </div>
-            <button type="button" class="btn btn-primary" id="addCategoryButton">Tambah Kategori</button>
-        </form>
-        <ul class="list-group mt-3" id="categoryList"></ul>
-    </div>
-
-    <!-- Product Management -->
-    <div class="mb-4">
-        <h4>Manajemen Produk</h4>
-        <form id="productForm">
-            <div class="form-group">
-                <label for="productName">Nama Produk</label>
-                <input type="text" class="form-control" id="productName" placeholder="Nama Produk">
-            </div>
-            <div class="form-group">
-                <label for="productCategory">Kategori Produk</label>
-                <select class="form-control" id="productCategory"></select>
-            </div>
-            <div class="form-group">
-                <label for="productPrice">Harga Produk</label>
-                <input type="number" class="form-control" id="productPrice" placeholder="Harga Produk">
-            </div>
-            <div class="form-group">
-                <label for="productQuantity">Jumlah Produk</label>
-                <input type="number" class="form-control" id="productQuantity" placeholder="Jumlah Produk">
-            </div>
-            <button type="button" class="btn btn-primary" id="addProductButton">Tambah Produk</button>
-        </form>
-        <ul class="list-group mt-3" id="productList"></ul>
-    </div>
-
-    <!-- Transaction Management -->
-    <div class="mb-4">
-        <h4>Transaksi</h4>
-        <form id="transactionForm">
-            <div class="form-group">
-                <label for="selectProduct">Pilih Produk</label>
-                <select class="form-control" id="selectProduct"></select>
-            </div>
-            <div class="form-group">
-                <label for="transactionQuantity">Jumlah</label>
-                <input type="number" class="form-control" id="transactionQuantity" placeholder="Jumlah">
-            </div>
-            <div class="form-group">
-                <label for="paymentMethod">Metode Pembayaran</label>
-                <select class="form-control" id="paymentMethod">
-                    <option value="cash">Cash</option>
-                    <option value="transfer">Transfer</option>
-                    <option value="ewallet">E-Wallet</option>
-                </select>
-            </div>
-            <button type="button" class="btn btn-primary" id="processTransactionButton">Proses Transaksi</button>
-        </form>
-
-        <ul class="list-group mt-3" id="cartList"></ul>
-        <button type="button" class="btn btn-success mt-3" id="checkoutButton">Checkout</button>
-    </div>
-
-    <!-- Generate Invoice and Reports -->
-    <div class="mb-4">
-        <h4>Laporan</h4>
-        <form id="reportForm">
-            <div class="form-group">
-                <label for="reportByCategory">Pilih Kategori</label>
-                <select class="form-control" id="reportByCategory">
-                    <option value="all">Semua Kategori</option>
-                </select>
-            </div>
-            <button type="button" class="btn btn-primary" id="generateReportButton">Generate Laporan</button>
-            <button type="button" class="btn btn-secondary" id="generatePDFButton">Generate PDF</button>
-            <button type="button" class="btn btn-info" id="generateInvoiceButton">Generate Invoice</button>
-        </form>
-    </div>
-
-    <!-- Receipt Printing -->
-    <div class="mb-4">
-        <h4>Print Receipt</h4>
-        <button type="button" class="btn btn-warning" id="printReceiptButton">Print Receipt</button>
-    </div>
-    
-    <!-- Invoice Container -->
-    <div id="invoiceContainer" class="mt-4"></div>
-</div>
-
-<script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
