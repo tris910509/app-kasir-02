@@ -64,13 +64,14 @@ document.getElementById("addCategoryButton").addEventListener("click", () => {
     categories.push(name);
     localStorage.setItem("categories", JSON.stringify(categories));
     renderCategoryList();
-    showNotification("Kategori berhasil ditambahkan.", "success");
-    document.getElementById("categoryName").value = "";
 
     // Populate product category select dropdown
     const productCategorySelect = document.getElementById("productCategory");
     productCategorySelect.innerHTML = `<option value="">Pilih Kategori</option>` + 
     categories.map(category => `<option value="${category}">${category}</option>`).join('');
+
+    showNotification("Kategori berhasil ditambahkan.", "success");
+    document.getElementById("categoryName").value = "";
 });
 
 function deleteCategory(index) {
@@ -86,6 +87,17 @@ const renderProductSelect = () => {
     const productSelect = document.getElementById("selectProduct");
     productSelect.innerHTML = products.map((product, index) => `
         <option value="${index}">${product.name} - ${product.category} - Rp${product.price.toFixed(2)}</option>
+    `).join('');
+};
+
+const renderProductList = () => {
+    const productList = document.getElementById("productList");
+    productList.innerHTML = products.map((product, index) => `
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            ${product.name} - ${product.category} - Rp${product.price.toFixed(2)} - Stok: ${product.quantity}
+            <button class="btn btn-warning btn-sm" onclick="editProduct(${index})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteProduct(${index})">Hapus</button>
+        </li>
     `).join('');
 };
 
@@ -109,23 +121,13 @@ document.getElementById("addProductButton").addEventListener("click", () => {
     products.push({ name, category, price, quantity });
     localStorage.setItem("products", JSON.stringify(products));
     renderProductSelect();
+    renderProductList();
     showNotification("Produk berhasil ditambahkan.", "success");
 
     document.getElementById("productName").value = "";
     document.getElementById("productPrice").value = "";
     document.getElementById("productQuantity").value = "";
 });
-
-function renderProductList() {
-    const productList = document.getElementById("productList");
-    productList.innerHTML = products.map((product, index) => `
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            ${product.name} - ${product.category} - Rp${product.price.toFixed(2)} - Stok: ${product.quantity}
-            <button class="btn btn-warning btn-sm" onclick="editProduct(${index})">Edit</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteProduct(${index})">Hapus</button>
-        </li>
-    `).join('');
-}
 
 function editProduct(index) {
     const product = products[index];
@@ -189,17 +191,14 @@ document.getElementById("processTransactionButton").addEventListener("click", ()
     }
 
     const totalPrice = product.price * quantity;
-    transactions.push({ product, quantity, totalPrice, paymentMethod, date: new Date().toLocaleString() });
+    cart.push({ product, quantity, totalPrice });
 
-    products[productIndex].quantity -= quantity;
+    product.quantity -= quantity;
     localStorage.setItem("products", JSON.stringify(products));
-    localStorage.setItem("transactions", JSON.stringify(transactions));
+    localStorage.setItem("cart", JSON.stringify(cart));
 
     showNotification("Transaksi berhasil.", "success");
-
-    renderTransactionHistory();
     renderCart();
-    renderProductSelect();
 });
 
 function renderCart() {
@@ -222,27 +221,29 @@ function removeFromCart(index) {
 }
 
 document.getElementById("checkoutButton").addEventListener("click", () => {
-    const totalAmount = cart.reduce((acc, item) => acc + item.totalPrice, 0);
-    const paymentMethod = document.getElementById("paymentMethod").value;
-
-    transactions.push({ cart, totalAmount, paymentMethod, date: new Date().toLocaleString() });
-
+    transactions.push({ cart, totalAmount: cart.reduce((acc, item) => acc + item.totalPrice, 0), paymentMethod: document.getElementById("paymentMethod").value, date: new Date().toLocaleString() });
     cart = [];
     localStorage.setItem("cart", JSON.stringify(cart));
     localStorage.setItem("transactions", JSON.stringify(transactions));
-
     showNotification("Checkout berhasil.", "success");
     renderCart();
+    renderTransactionList();
 });
 
-// Generate Invoice
-document.getElementById("generateInvoiceButton").addEventListener("click", () => {
-    const transaction = transactions[transactions.length - 1];
-    if (!transaction) {
-        showNotification("Transaksi terakhir tidak ditemukan.", "danger");
-        return;
-    }
+const renderTransactionList = () => {
+    const transactionList = document.getElementById("transactionList");
+    transactionList.innerHTML = transactions.map((transaction, index) => `
+        <li class="list-group-item">
+            <p><strong>Tanggal:</strong> ${transaction.date}</p>
+            <p><strong>Total:</strong> Rp${transaction.totalAmount.toFixed(2)}</p>
+            <p><strong>Metode Pembayaran:</strong> ${transaction.paymentMethod}</p>
+            <button class="btn btn-primary btn-sm" onclick="generateInvoice(${index})">Lihat Invoice</button>
+        </li>
+    `).join('');
+};
 
+function generateInvoice(index) {
+    const transaction = transactions[index];
     const invoiceHtml = `
         <h4>Invoice</h4>
         <p><strong>Tanggal:</strong> ${transaction.date}</p>
@@ -250,16 +251,13 @@ document.getElementById("generateInvoiceButton").addEventListener("click", () =>
         <p><strong>Metode Pembayaran:</strong> ${transaction.paymentMethod}</p>
         <h5>Detail Produk</h5>
         <ul>
-            ${transaction.cart.map(item => `
-                <li>${item.product.name} - Qty: ${item.quantity} - Total: Rp${item.totalPrice.toFixed(2)}</li>
-            `).join('')}
+            ${transaction.cart.map(item => `<li>${item.product.name} - Qty: ${item.quantity} - Total: Rp${item.totalPrice.toFixed(2)}</li>`).join('')}
         </ul>
     `;
-
     document.getElementById("invoiceContainer").innerHTML = invoiceHtml;
-});
+}
 
-// Generate Reports
+// Reports
 document.getElementById("generateReportButton").addEventListener("click", () => {
     const category = document.getElementById("reportByCategory").value;
     let filteredProducts = products;
@@ -289,7 +287,9 @@ document.getElementById("printReceiptButton").addEventListener("click", () => {
     document.body.innerHTML = originalContent;
 });
 
+// Initial render
 renderSupplierList();
 renderCategoryList();
 renderProductSelect();
 renderProductList();
+renderTransactionList();
