@@ -25,6 +25,10 @@
                         <label for="itemQuantity" class="form-label">Jumlah</label>
                         <input type="number" id="itemQuantity" class="form-control" placeholder="Masukkan jumlah barang" required>
                     </div>
+                    <div class="mb-3">
+                        <label for="itemDiscount" class="form-label">Diskon (%)</label>
+                        <input type="number" id="itemDiscount" class="form-control" placeholder="Masukkan diskon (opsional)">
+                    </div>
                     <button type="submit" class="btn btn-primary w-100">Tambah Barang</button>
                 </form>
             </div>
@@ -32,10 +36,33 @@
                 <h3>Daftar Barang</h3>
                 <ul id="itemList" class="list-group"></ul>
                 <h4 class="mt-4">Total: Rp <span id="totalPrice">0</span></h4>
-                <button class="btn btn-success w-100 mt-3" id="printReceipt">Cetak Struk</button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-danger w-50" id="resetAll">Reset Total</button>
+                    <button class="btn btn-success w-50" id="printReceipt">Cetak Struk</button>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Modal untuk Struk -->
+    <div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="receiptModalLabel">Struk Belanja</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="receiptContent">
+                    <!-- Isi struk akan di-generate melalui JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
