@@ -104,3 +104,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderTransactions();
 });
+
+
+const currencySelector = document.getElementById("currencySelector");
+let currencyRate = 1;
+let currencySymbol = "Rp";
+
+currencySelector.addEventListener("change", (e) => {
+    const selectedOption = e.target.options[e.target.selectedIndex];
+    currencyRate = parseFloat(selectedOption.getAttribute("data-rate"));
+    currencySymbol = selectedOption.value === "IDR" ? "Rp" : selectedOption.value;
+
+    updatePrices();
+});
+
+const printReceipt = document.getElementById("printReceipt");
+printReceipt.addEventListener("click", () => {
+    window.print();
+});
+
+const renderItems = () => {
+    itemList.innerHTML = items
+        .filter((item) => {
+            const filterValue = document.getElementById("filterCategory").value;
+            return filterValue === "" || item.category === filterValue;
+        })
+        .map((item, index) => `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                ${item.name} (${item.quantity}x, ${item.category}) - ${currencySymbol} ${(item.totalPrice * currencyRate).toLocaleString()}
+                <button class="btn btn-danger btn-sm" onclick="deleteItem(${index})">Hapus</button>
+            </li>
+        `).join("");
+    updatePrices();
+};
+
+document.getElementById("filterCategory").addEventListener("change", renderItems);
+
+
+
