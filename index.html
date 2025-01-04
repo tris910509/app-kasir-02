@@ -38,13 +38,23 @@
             </div>
             <div class="mb-3">
                 <label for="productPrice">Harga Produk</label>
-                <input type="number" id="productPrice" class="form-control" step="0.01">
+                <input type="number" id="productPrice" class="form-control" step="0.01" min="0" placeholder="Masukkan harga produk" required>
             </div>
             <div class="mb-3">
                 <label for="productQuantity">Jumlah Produk</label>
-                <input type="number" id="productQuantity" class="form-control">
+                <input type="number" id="productQuantity" class="form-control" min="1" placeholder="Masukkan jumlah produk" required>
             </div>
             <button id="addProductButton" class="btn btn-primary mt-2">Tambah Produk</button>
+            <div id="productEditContainer" class="mt-3 d-none"></div>
+        </div>
+
+        <!-- Keranjang Belanja -->
+        <div class="mb-4">
+            <h5>Keranjang Belanja</h5>
+            <ul id="cartList" class="list-group mt-3"></ul>
+            <div class="mt-3">
+                <button id="checkoutButton" class="btn btn-success">Proses Checkout</button>
+            </div>
         </div>
 
         <!-- Transaksi -->
@@ -77,6 +87,13 @@
             <ul id="transactionHistory" class="list-group mt-3"></ul>
         </div>
 
+        <!-- Invoice -->
+        <div class="mb-4">
+            <h5>Invoice</h5>
+            <button id="generateInvoiceButton" class="btn btn-success mt-2">Buat Invoice</button>
+            <div id="invoiceContainer" class="mt-3"></div>
+        </div>
+
         <!-- Laporan -->
         <div class="mb-4">
             <h5>Laporan</h5>
@@ -87,6 +104,7 @@
                 </select>
             </div>
             <button id="generateReportButton" class="btn btn-success mt-2">Unduh Laporan</button>
+            <button id="generatePDFButton" class="btn btn-info mt-2">Unduh PDF Laporan</button>
         </div>
 
         <!-- Struk -->
@@ -104,6 +122,7 @@
         let suppliers = JSON.parse(localStorage.getItem("suppliers")) || [];
         let products = JSON.parse(localStorage.getItem("products")) || [];
         let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+        let cart = [];
 
         // Fungsi untuk menampilkan notifikasi
         function showNotification(message, type) {
@@ -160,7 +179,7 @@
             const price = parseFloat(document.getElementById("productPrice").value);
             const quantity = parseInt(document.getElementById("productQuantity").value, 10);
 
-            if (!name || !category || isNaN(price) || isNaN(quantity)) {
+            if (!name || !category || isNaN(price) || isNaN(quantity) || price <= 0 || quantity <= 0) {
                 showNotification("Mohon isi semua field dengan benar.", "danger");
                 return;
             }
@@ -176,6 +195,52 @@
 
             renderProductSelect();
         });
+
+        // Edit Product
+        document.getElementById("productEditContainer").addEventListener("submit", event => {
+            event.preventDefault();
+            const productIndex = parseInt(document.getElementById("productEditIndex").value);
+            const name = document.getElementById("editProductName").value.trim();
+            const category = document.getElementById("editProductCategory").value.trim();
+            const price = parseFloat(document.getElementById("editProductPrice").value);
+            const quantity = parseInt(document.getElementById("editProductQuantity").value, 10);
+
+            if (!name || !category || isNaN(price) || isNaN(quantity) || price <= 0 || quantity <= 0) {
+                showNotification("Mohon isi semua field dengan benar.", "danger");
+                return;
+            }
+
+            products[productIndex] = { name, category, price, quantity };
+            localStorage.setItem("products", JSON.stringify(products));
+            renderProductSelect();
+            showNotification("Produk berhasil diperbarui.", "success");
+            document.getElementById("productEditContainer").classList.add('d-none');
+        });
+
+        // Delete Supplier
+        function deleteSupplier(index) {
+            suppliers.splice(index, 1);
+            localStorage.setItem("suppliers", JSON.stringify(suppliers));
+            renderSupplierList();
+        }
+
+        // Render Transaction History
+        function renderTransactionHistory() {
+            const transactionHistory = document.getElementById("transactionHistory");
+            transactionHistory.innerHTML = "";
+            transactions.forEach((transaction, index) => {
+                const li = document.createElement("li");
+                li.className = "list-group-item";
+                li.innerHTML = `
+                    Produk: ${transaction.product.name} <br>
+                    Jumlah: ${transaction.quantity} <br>
+                    Total: Rp${transaction.totalPrice} <br>
+                    Metode Pembayaran: ${transaction.paymentMethod} <br>
+                    Tanggal: ${transaction.date}
+                `;
+                transactionHistory.appendChild(li);
+            });
+        }
 
         // Process Transaction
         document.getElementById("processTransactionButton").addEventListener("click", () => {
@@ -204,23 +269,69 @@
             renderTransactionHistory();
         });
 
-        // Render Transaction History
-        function renderTransactionHistory() {
-            const transactionHistory = document.getElementById("transactionHistory");
-            transactionHistory.innerHTML = "";
-            transactions.forEach((transaction, index) => {
+        // Add to Cart
+        document.getElementById("selectProduct").addEventListener("change", function() {
+            const productIndex = parseInt(this.value);
+            const quantity = parseInt(document.getElementById("transactionQuantity").value, 10);
+            if (!productIndex || !quantity || quantity <= 0) return;
+
+            const product = products[productIndex];
+            if (product.quantity < quantity) {
+                showNotification("Jumlah yang dimasukkan melebihi stok tersedia.", "danger");
+                return;
+            }
+
+            const existingProductIndex = cart.findIndex(item => item.productIndex === productIndex);
+            if (existingProductIndex > -1) {
+                cart[existingProductIndex].quantity += quantity;
+            } else {
+                cart.push({ productIndex, quantity });
+            }
+            
+            localStorage.setItem("cart", JSON.stringify(cart));
+            renderCart();
+        });
+
+        // Render Cart
+        function renderCart() {
+            const cartList = document.getElementById("cartList");
+            cartList.innerHTML = "";
+            cart.forEach((item, index) => {
+                const product = products[item.productIndex];
                 const li = document.createElement("li");
-                li.className = "list-group-item";
+                li.className = "list-group-item d-flex justify-content-between align-items-center";
                 li.innerHTML = `
-                    Produk: ${transaction.product.name} <br>
-                    Jumlah: ${transaction.quantity} <br>
-                    Total: Rp${transaction.totalPrice} <br>
-                    Metode Pembayaran: ${transaction.paymentMethod} <br>
-                    Tanggal: ${transaction.date}
+                    ${product.name} - ${product.quantity} - Rp${product.price * item.quantity}
+                    <button class="btn btn-danger btn-sm" onclick="removeFromCart(${index})">Hapus</button>
                 `;
-                transactionHistory.appendChild(li);
+                cartList.appendChild(li);
             });
         }
+
+        // Remove from Cart
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            localStorage.setItem("cart", JSON.stringify(cart));
+            renderCart();
+        }
+
+        // Checkout
+        document.getElementById("checkoutButton").addEventListener("click", () => {
+            transactions = [...transactions, ...cart.map(item => {
+                const product = products[item.productIndex];
+                const totalPrice = product.price * item.quantity;
+                product.quantity -= item.quantity;
+                return { product, quantity: item.quantity, paymentMethod: "cash", totalPrice, date: new Date().toLocaleString() };
+            })];
+
+            localStorage.setItem("products", JSON.stringify(products));
+            localStorage.setItem("transactions", JSON.stringify(transactions));
+            cart = [];
+            localStorage.setItem("cart", JSON.stringify(cart));
+            showNotification("Checkout berhasil diproses.", "success");
+            renderTransactionHistory();
+            renderCart();
+        });
 
         // Generate Report
         document.getElementById("generateReportButton").addEventListener("click", () => {
@@ -245,43 +356,63 @@
             });
 
             const encodedUri = encodeURI(csvContent);
-            const downloadAnchor = document.createElement("a");
-            downloadAnchor.href = encodedUri;
-            downloadAnchor.download = "Laporan_Produk.csv";
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            document.body.removeChild(downloadAnchor);
+            window.open(encodedUri);
+        }
+
+        // Generate PDF Report
+        document.getElementById("generatePDFButton").addEventListener("click", () => {
+            const reportByCategory = document.getElementById("reportByCategory").value;
+            let filteredProducts;
+
+            if (reportByCategory === "all") {
+                filteredProducts = products;
+            } else {
+                filteredProducts = products.filter(p => p.category === reportByCategory);
+            }
+
+            generatePDF(filteredProducts);
+        });
+
+        function generatePDF(data) {
+            let pdfContent = `<h1>Laporan Produk</h1>`;
+            pdfContent += "<table class='table table-bordered'>";
+            pdfContent += "<thead><tr><th>Nama Produk</th><th>Kategori</th><th>Harga</th><th>Jumlah</th><th>Total</th></tr></thead><tbody>";
+
+            data.forEach(product => {
+                const totalPrice = product.price * product.quantity;
+                pdfContent += `<tr><td>${product.name}</td><td>${product.category}</td><td>${product.price}</td><td>${product.quantity}</td><td>${totalPrice}</td></tr>`;
+            });
+
+            pdfContent += "</tbody></table>";
+
+            const pdfWindow = window.open('', '_blank');
+            pdfWindow.document.write(pdfContent);
+            pdfWindow.document.close();
+            pdfWindow.print();
         }
 
         // Print Receipt
         document.getElementById("printReceiptButton").addEventListener("click", () => {
-            const transactionList = transactions.map(transaction => {
-                return `
-                    Produk: ${transaction.product.name} <br>
-                    Jumlah: ${transaction.quantity} <br>
-                    Total: Rp${transaction.totalPrice} <br>
-                    Metode Pembayaran: ${transaction.paymentMethod} <br>
-                    Tanggal: ${transaction.date} <br><br>
-                `;
-            }).join("");
+            let receiptContent = `<h1>Struk Transaksi</h1>`;
+            receiptContent += "<ul class='list-group'>";
 
-            const receiptContent = `
-                <h4>Struk Transaksi</h4>
-                ${transactionList}
-                <p>Total: Rp${transactions.reduce((acc, t) => acc + t.totalPrice, 0)}</p>
-            `;
+            transactions.forEach(transaction => {
+                receiptContent += `<li class='list-group-item'>Produk: ${transaction.product.name}<br>Jumlah: ${transaction.quantity}<br>Total: Rp${transaction.totalPrice}<br>Metode Pembayaran: ${transaction.paymentMethod}<br>Tanggal: ${transaction.date}</li>`;
+            });
 
-            const receiptWindow = window.open('', 'Print Receipt');
+            receiptContent += "</ul>";
+
+            const receiptWindow = window.open('', '_blank');
             receiptWindow.document.write(receiptContent);
-            receiptWindow.document.write('<button onclick="window.print()">Cetak</button>');
-            receiptWindow.document.write('<button onclick="window.close()">Tutup</button>');
             receiptWindow.document.close();
+            receiptWindow.print();
         });
 
-        // Render All UI Components
+        // Initial Render
         renderSupplierList();
         renderProductSelect();
         renderTransactionHistory();
+        renderCart();
     </script>
 </body>
 </html>
